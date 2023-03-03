@@ -51,7 +51,6 @@ export const fetchTokenMetadata = async (
 
   const newState = { ...prevState };
   filteredTokens.forEach((token) => (newState.status[token] = "pending"));
-  const results = [];
   for await (const token of filteredTokens) {
     try {
       const decimalsHex = await provider.call({
@@ -65,11 +64,11 @@ export const fetchTokenMetadata = async (
           `tried to fetch decimals for token ${token} but got illegal value ${decimalsHex}`
         );
       }
-      results.push({
-        token: token,
-        type: "decimals",
-        decimals: Number(decimals),
-      });
+      if(newState.tokens[token])
+        {
+            newState.tokens[token].decimals = Number(decimals);
+        }
+        
     } catch (e) {
       console.error(e);
     }
@@ -96,11 +95,10 @@ export const fetchTokenMetadata = async (
           );
         }
       }
-      results.push({
-        token: token,
-        type: "symbol",
-        symbol: symbol,
-      });
+      if(newState.tokens[token])
+        {
+            newState.tokens[token].symbol = symbol;
+        }
     } catch (e) {
       console.error(e);
     }
@@ -115,34 +113,15 @@ export const fetchTokenMetadata = async (
       });
       const isNft = isNftHex.length > 2 ? BigInt(isNftHex) == 1n : false;
 
-      results.push({
-        token: token,
-        type: "isNft",
-        isNft: isNft,
-      });
+      if(newState.tokens[token])
+      {
+        newState.tokens[token].isNft = isNft;
+      }
     } catch (e) {
       console.error(e);
     }
   }
 
-  console.log("DEOOONE");
-  return newState;
 
-  filteredTokens.forEach((token) => {
-    newState.status[token] = "fetched";
-    newState.tokens[token] = {};
-  });
-
-  results.forEach((result) => {
-    if (!result) return;
-
-    if (result.type === "decimals") {
-      newState.tokens[result.token].decimals = result.decimals;
-    } else if (result.type === "symbol") {
-      newState.tokens[result.token].symbol = result.symbol;
-    } else if (result.type === "isNft") {
-      newState.tokens[result.token].isNft = result.isNft;
-    }
-  });
   return newState;
 };

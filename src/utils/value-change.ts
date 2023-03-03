@@ -262,7 +262,6 @@ const getTransactionMetadata = async (provider: Provider, txhash: string): Promi
 
             priceMetadata = await fetchDefiLlamaPrices(priceMetadata, [chainConfig!.coingeckoId], block!.timestamp);
         }
-        console.log("DONE");
         [traceResult, traceMetadata] = await tryFetchTrace(txhash);
     };
 
@@ -313,13 +312,10 @@ const main =  async (txhash: string) => {
     }
  
     tokenMetadata = await fetchTokenMetadata(tokenMetadata, provider, Array.from(allTokens));
-    console.log(
-        "SSDASOK"
-    );
+   
     [changes, allTokens] = computeBalanceChanges(traceResult.entrypoint,
         traceMetadata, tokenMetadata, chainConfig, priceMetadata);
 
-    // return JSON.stringify(changes, (_, v) => typeof v === 'bigint' ? v.toString() : v);
 
     return Object.entries(changes).sort((a, b) => {
         if (!a[1].hasMissingPrices && !b[1].hasMissingPrices) {
