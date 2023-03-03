@@ -1,3 +1,5 @@
+import { fetch }  from 'cross-fetch'
+
 export type ChainConfig = {
     chainId: number;
     id: string;

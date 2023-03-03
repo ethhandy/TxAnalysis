@@ -1,4 +1,5 @@
 import { JsonFragment } from 'ethers';
+import { fetch }  from 'cross-fetch'
 
 export type AddressInfo = {
     label: string;

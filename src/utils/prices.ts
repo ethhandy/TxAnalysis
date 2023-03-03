@@ -1,4 +1,5 @@
 import { ChainConfig } from './chains';
+import { fetch }  from 'cross-fetch'
 
 const NATIVE_TOKEN = 'native_token';
 

@@ -179,7 +179,6 @@ const tryFetchTrace = async (txhash: string) : Promise<[TraceResponse, TraceMeta
             labels[address] = labels[address] || info.label;
 
             try {
-                console.log(info);
                 metadata.abis[address][codehash] = new Interface([
                     ...Object.values(info.functions),
                     ...Object.values(info.events),
@@ -217,7 +216,6 @@ const tryFetchTrace = async (txhash: string) : Promise<[TraceResponse, TraceMeta
 
     // Object.keys(labels).forEach((addr) => delete customLabels[chain][addr]);
     customLabels[chain] = labels;
-
     return [traceResponse, metadata];
 }
 
@@ -264,7 +262,7 @@ const getTransactionMetadata = async (provider: Provider, txhash: string): Promi
 
             priceMetadata = await fetchDefiLlamaPrices(priceMetadata, [chainConfig!.coingeckoId], block!.timestamp);
         }
-
+        console.log("DONE");
         [traceResult, traceMetadata] = await tryFetchTrace(txhash);
     };
 
@@ -281,26 +279,28 @@ const getTransactionMetadata = async (provider: Provider, txhash: string): Promi
     return true;
 }
 
-export default async (txhash: string) => {
+const main =  async (txhash: string) => {
     chainConfig = await getChain(chain);
     if (typeof chainConfig === 'undefined') {
         return {error: `Cannot find chain: ${chain}.`};
     }
     
     [traceResult, traceMetadata] = await tryFetchTrace(txhash);
+    console.log(chainConfig?.rpcUrl)
     provider = new JsonRpcProvider(chainConfig?.rpcUrl);
     provider.getBlockNumber().catch(() => {});
 
     tokenMetadata = defaultTokenMetadata();
     priceMetadata = defaultPriceMetadata();
     const ok = await getTransactionMetadata(provider, txhash);
+    
     if (ok === false) {
         return {error: `Cannot find transaction: ${txhash}.`};
     }
     
     let [changes, allTokens] = computeBalanceChanges(traceResult.entrypoint,
         traceMetadata, tokenMetadata, chainConfig, priceMetadata);
-    
+      
     if (transactionMetadata.result) {
         priceMetadata = await fetchDefiLlamaPrices(
             priceMetadata,
@@ -311,8 +311,11 @@ export default async (txhash: string) => {
             transactionMetadata.result.timestamp,
         );
     }
+ 
     tokenMetadata = await fetchTokenMetadata(tokenMetadata, provider, Array.from(allTokens));
-
+    console.log(
+        "SSDASOK"
+    );
     [changes, allTokens] = computeBalanceChanges(traceResult.entrypoint,
         traceMetadata, tokenMetadata, chainConfig, priceMetadata);
 
@@ -372,3 +375,4 @@ export default async (txhash: string) => {
         }
     });
 }
+export default main
